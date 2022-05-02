@@ -70,7 +70,6 @@ class BrandIdentification:
                              "'ner_conll_bert_base_cased'.")
 
         self.__model_name = name
-        self.build_pipeline()
 
     @property
     def partitions(self) -> int:
