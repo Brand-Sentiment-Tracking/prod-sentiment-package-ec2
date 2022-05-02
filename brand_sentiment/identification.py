@@ -85,7 +85,7 @@ class BrandIdentification:
     @partitions.setter
     def partitions(self, n: int):
         if type(n) != int:
-            raise ValueError("Partitions is not an integer")
+            raise ValueError("Partitions is not an integer.")
         elif n <= 0:
             raise ValueError("Partitions is not greater than 0.")
 
