@@ -42,6 +42,9 @@ class BrandIdentification:
         self.model_name = model_name
         self.partitions = partitions
 
+        self.__model = None
+        self.__pipeline = None
+
     @property
     def model(self) -> PipelineModel:
         """`PipelineModel`: The model to transform the dataframe by."""
@@ -67,7 +70,7 @@ class BrandIdentification:
                              "'ner_conll_bert_base_cased'.")
 
         self.__model_name = name
-        self.__build_pipeline()
+        self.build_pipeline()
 
     @property
     def partitions(self) -> int:
@@ -163,7 +166,7 @@ class BrandIdentification:
 
         return [embeddings, ner_model]
 
-    def __build_pipeline(self):
+    def build_pipeline(self):
         """Build the complete pipeline and model to be used for NER."""
         self.logger.info("Building NER Pipeline...")
 
@@ -213,6 +216,9 @@ class BrandIdentification:
             DataFrame: The same dataframe, but with an extra column `entities`
                 conatining the result of the NER analysis.
         """
+        if self.model is None:
+            self.build_pipeline()
+
         self.logger.info("Running NER model.")
 
         brand_df = self.model.transform(df) \

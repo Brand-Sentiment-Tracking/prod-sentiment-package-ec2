@@ -37,8 +37,9 @@ class SentimentIdentification:
 
         self.spark = spark
         self.model_name = model_name
-
         self.partitions = partitions
+
+        self.__model = None
 
     @property
     def model(self) -> PretrainedPipeline:
@@ -47,10 +48,7 @@ class SentimentIdentification:
 
     @property
     def model_name(self) -> str:
-        """`str`: The name of the pretrained model to build.
-
-        Once this has been set, the model will be built.
-        """
+        """`str`: The name of the pretrained model to build."""
         return self.__model_name
 
     @model_name.setter
@@ -63,7 +61,6 @@ class SentimentIdentification:
                                 "pipeline to crash.")
 
         self.__model_name = name
-        self.__model = PretrainedPipeline(self.model_name, lang='en')
 
     @property
     def partitions(self) -> int:
@@ -84,6 +81,9 @@ class SentimentIdentification:
             raise ValueError("Partitions is not greater than 0.")
 
         self.__partitions = n
+
+    def build_pipeline(self):
+        self.__model = PretrainedPipeline(self.model_name, lang='en')
 
     def __get_sentiment_scores(self, df: DataFrame,
                                window: WindowSpec) -> DataFrame:
@@ -181,6 +181,9 @@ class SentimentIdentification:
         Returns:
             DataFrame: The dataframe with the added sentiment analysis.
         """
+        if self.model is None:
+            self.build_pipeline()
+
         self.logger.info("Running sentiment model...")
         df = self.model.transform(brand_df)
 

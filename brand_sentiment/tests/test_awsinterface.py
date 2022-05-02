@@ -9,11 +9,8 @@ from .. import AWSInterface
 class TestAWSInterface(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        jslnlp_package = "com.johnsnowlabs.nlp:spark-nlp_2.12:3.4.2"
-
         self.spark = SparkSession.builder \
             .appName("TestAWSInterface") \
-            .config('spark.jars.packages', jslnlp_package) \
             .config("spark.sql.broadcastTimeout", "36000") \
             .config("fs.s3.maxConnections", 100) \
             .getOrCreate()
