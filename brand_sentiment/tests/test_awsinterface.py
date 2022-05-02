@@ -23,7 +23,7 @@ class TestAWSInterface(unittest.TestCase):
         self.sentiment_bucket = f"{self.unit_test_bucket}/sent/uploads"
 
         self.partitions = 32
-        self.extraction_date = datetime(2022, 4, 26)
+        self.extraction_date = datetime(2022, 4, 3)
 
         super().__init__(*args, **kwargs)
 
