@@ -196,7 +196,7 @@ class BrandIdentification:
 
     @staticmethod
     @F.udf(returnType=ArrayType(ArrayType(StringType())))
-    def __extract_brands(rows: List[Row]) -> List[List[str, str]]:
+    def __extract_brands(rows: List[Row]) -> List[List[str]]:
         """User defined function to return a list of names and entity types."""
         return [[row.result, row.metadata['entity']] for row in rows]
 
