@@ -1,0 +1,91 @@
+name: Test, build and push Sentiment Application to AWS ECR
+
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  REGISTRY: 357883163469.dkr.ecr.us-east-1.amazonaws.com
+  REPOSITORY: sentiment-package-ec2
+
+jobs:
+  lint:
+    name: Lint Sentiment Application
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8"]
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - name: Set up Python v${{ matrix.python-version }}
+      id: setup-python
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install flake8
+      id: install-flake8
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8
+    - name: Run flake8
+      id: run-flake8
+      run: |
+        python -m flake8 brand_sentiment
+
+  test:
+    name: Test Sentiment Application
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - name: Build image
+      uses: docker/build-push-action@v2.10.0
+      with:
+        context: .
+        push: false
+        tags: ${{ env.REPOSITORY }}:test
+
+    - name: Run unit tests
+      id: docker-run-pytest
+      run: |
+        docker run --entrypoint=./test.sh \
+          -e AWS_ACCESS_KEY_ID=${{ secrets.SENTIMENT_GITHUB_USER_KEY }} \
+          -e AWS_SECRET_ACCESS_KEY=${{ secrets.SENTIMENT_GITHUB_USER_SECRET }} \
+          ${{ env.REPOSITORY }}:test
+    
+  push:
+    name: Push Sentiment Application to ECR
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      id: configure-aws
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.SENTIMENT_GITHUB_USER_KEY }}
+        aws-secret-access-key: ${{ secrets.SENTIMENT_GITHUB_USER_SECRET }}
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build and push to ECR
+      uses: docker/build-push-action@v2.10.0
+      with:
+        context: .
+        platforms: linux/amd64
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:latest
