@@ -20,8 +20,8 @@ _Note: This class assumes the dataframes are from parquet files partitioned firs
 Run NER Analysis on articles using spark dataframes.
 
 Currently, only two NER models are supported:
-    - `xlnet_base` (default)
-    - `ner_conll_bert_base_cased`
+    * `xlnet_base` (default)
+    * `ner_conll_bert_base_cased`
 
 ### `SentimentIdentification` Class
 
