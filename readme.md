@@ -4,8 +4,8 @@
 Make sure you have Java 8 installed and Apache Spark installed
 
 To install the requirements use this command:
-  
-  python3.8 -m pip install -r requirements.txt
+
+    python3.8 -m pip install -r requirements.txt
 
 ## Usage
 
