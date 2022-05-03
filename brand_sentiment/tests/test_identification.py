@@ -1,8 +1,16 @@
 import unittest
 
+from datetime import datetime
+
 from pyspark.sql import SparkSession, DataFrame # noqa
 
-from .. import BrandIdentification
+from pyspark.ml import Pipeline
+
+from sparknlp.base import DocumentAssembler
+from sparknlp.annotator import XlnetForTokenClassification, \
+    Tokenizer, BertEmbeddings, NerDLModel, NerConverter
+
+from .. import AWSInterface, BrandIdentification
 
 
 class TestBrandIdentification(unittest.TestCase):
@@ -13,18 +21,31 @@ class TestBrandIdentification(unittest.TestCase):
         self.spark = SparkSession.builder \
             .appName("TestBrandIdentification") \
             .config('spark.jars.packages', jslnlp_package) \
+            .config("spark.driver.memory", "10g") \
             .config("spark.sql.broadcastTimeout", "36000") \
             .config("fs.s3.maxConnections", 100) \
             .getOrCreate()
 
         self.resources = "./brand_sentiment/tests/resources"
 
+        self.unit_test_bucket = "brand-sentiment-unit-testing"
+
+        self.extraction_bucket = f"{self.unit_test_bucket}/sent/downloads"
+        self.sentiment_bucket = f"{self.unit_test_bucket}/sent/uploads"
+
+        self.extraction_date = datetime(2022, 4, 3)
+
         self.model_name = "xlnet_base"
         self.partitions = 32
 
-        self.brand_columns = set(["title", "main_text", "url",
-                                  "source_domain", "date_publish",
-                                  "language"])
+        self.brand_columns = set(["text", "source_domain", "date_publish",
+                                  "language", "entities"])
+
+        aws = AWSInterface(self.spark, self.extraction_bucket,
+                           self.sentiment_bucket, self.partitions,
+                           self.extraction_date)
+
+        self.df = aws.download(limit=100)
 
         super().__init__(*args, **kwargs)
 
@@ -70,48 +91,71 @@ class TestBrandIdentification(unittest.TestCase):
         self.assertEqual(e2, "Partitions is not greater than 0.")
 
     """
-    Cannot run these unittests in GitHub because the models are so large.
+    Cannot run these unit tests in GitHub because the models are too large.
     Ideally we use a self-hosted runner for this job.
+    These tests have been run and passed on AWS.
     """
 
     """
     def test_build_xlnet_pipeline(self):
         self.brand.model_name = "xlnet_base"
-        # Need to find a better way to check this is the correct pipeline
-        self.assertEqual(len(self.brand.pipeline.stages), 4)
+        self.brand.build_pipeline()
+        stages = self.brand.pipeline.getStages()
+
+        instances = [
+            DocumentAssembler,
+            Tokenizer,
+            XlnetForTokenClassification,
+            NerConverter
+        ]
+
+        for stage, instance in zip(stages, instances):
+            self.assertIsInstance(stage, instance)
+        
+        self.assertEqual(len(stages), len(instances))
 
     def test_build_conll_pipeline(self):
         self.brand.model_name = "ner_conll_bert_base_cased"
-        # Need to find a better way to check this is the correct pipeline
-        self.assertEqual(len(self.brand.pipeline.stages), 5)
+        self.brand.build_pipeline()
+        
+        stages = self.brand.pipeline.getStages()
+
+        instances = [
+            DocumentAssembler, 
+            Tokenizer, 
+            BertEmbeddings,
+            NerDLModel, 
+            NerConverter
+        ]
+
+        for stage, instance in zip(stages, instances):
+            self.assertIsInstance(stage, instance)
+        
+        self.assertEqual(len(stages), len(instances))
 
     def test_predict_brand_xlnet_base(self):
-        df = self.spark.read.parquet(f"{self.resources}/articles.parquet")
         self.brand.model_name = "xlnet_base"
-        brand_df = self.brand.predict_brand(df)
+        brand_df = self.brand.predict_brand(self.df)
 
         self.assertIsInstance(brand_df, DataFrame)
-        self.assertEqual(brand_df.count(), df.count())
+        self.assertEqual(brand_df.count(), self.df.count())
         self.assertSetEqual(set(brand_df.columns), self.brand_columns)
 
     def test_predict_brand_conll_bert(self):
-        df = self.spark.read.parquet(f"{self.resources}/articles.parquet")
         self.brand.model_name = "ner_conll_bert_base_cased"
-        brand_df = self.brand.predict_brand(df)
+        brand_df = self.brand.predict_brand(self.df)
 
         self.assertIsInstance(brand_df, DataFrame)
-        self.assertEqual(brand_df.count(), df.count())
+        self.assertEqual(brand_df.count(), self.df.count())
         self.assertSetEqual(set(brand_df.columns), self.brand_columns)
 
     def test_predict_brand_with_filtering(self):
-        df = self.spark.read.parquet(f"{self.resources}/articles.parquet")
-        brand_df = self.brand.predict_brand(df, True)
+        brand_df = self.brand.predict_brand(self.df, True)
 
         self.assertIsInstance(brand_df, DataFrame)
-        self.assertLess(brand_df.count(), df.count())
+        self.assertLess(brand_df.count(), self.df.count())
         self.assertSetEqual(set(brand_df.columns), self.brand_columns)
     """
-
 
 if __name__ == "__main__":
     unittest.main()
