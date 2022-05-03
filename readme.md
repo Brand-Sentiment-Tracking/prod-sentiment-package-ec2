@@ -46,7 +46,3 @@ ENV SENTIMENT_MODEL=classifierdl_bertwiki_finance_sentiment_pipeline
 ENV DATAFRAME_PARTITIONS=32
 ENV DATAFRAME_LIMIT=100
 ```
-
-## Repository Structure
-
-## Contact
