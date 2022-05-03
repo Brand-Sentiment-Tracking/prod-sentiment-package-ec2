@@ -76,7 +76,7 @@ class TestSentimentIdentification(unittest.TestCase):
         self.assertEqual(self.brand.partitions, 50)
 
     def test_invalid_partition_size(self):
-        with self.assertRaises(ValueError) as a1:
+        with self.assertRaises(TypeError) as a1:
             self.brand.partitions = "Not too many records pls"
 
         with self.assertRaises(ValueError) as a2:

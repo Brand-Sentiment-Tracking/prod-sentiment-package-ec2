@@ -1,0 +1,7 @@
+# Ignore all caching
+__pycache__
+
+# Ignore random config files
+.vscode/
+.DS_Store
+.python-version
