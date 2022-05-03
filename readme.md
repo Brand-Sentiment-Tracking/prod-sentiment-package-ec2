@@ -13,8 +13,7 @@ To install the requirements use this command:
 
 Download, preprocess and upload article dataframes via AWS S3.
 
-Note:
-    This class assumes the dataframes are from parquet files partitioned first by date crawled, followed by language.
+_Note: This class assumes the dataframes are from parquet files partitioned first by date crawled, followed by language._
 
 ### `BrandIdentification` Class
 
@@ -28,10 +27,7 @@ Currently, only two NER models are supported:
 
 Run Sentiment Analysis on articles using spark dataframes.+
 
-Note:
-    Currently, only `classifierdl_bertwiki_finance_sentiment_pipeline` is
-    supported. Other models can be used, but the program may crash.
-
+_Note: Currently, only `classifierdl_bertwiki_finance_sentiment_pipeline` is supported. Other models can be used, but the program may crash._
 ### Configuration
 
 ```docker
