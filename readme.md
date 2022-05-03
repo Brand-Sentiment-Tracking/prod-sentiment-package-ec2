@@ -25,7 +25,7 @@ Currently, only two NER models are supported:
 
 ### `SentimentIdentification` Class
 
-Run Sentiment Analysis on articles using spark dataframes.+
+Run Sentiment Analysis on articles using spark dataframes.
 
 _Note: Currently, only `classifierdl_bertwiki_finance_sentiment_pipeline` is supported. Other models can be used, but the program may crash._
 ### Configuration
