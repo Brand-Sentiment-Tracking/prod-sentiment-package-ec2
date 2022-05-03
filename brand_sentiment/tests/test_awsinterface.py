@@ -10,7 +10,7 @@ class TestAWSInterface(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         jslnlp_package = "com.johnsnowlabs.nlp:spark-nlp_2.12:3.4.2"
-    
+
         self.spark = SparkSession.builder \
             .appName("TestAWSInterface") \
             .config('spark.jars.packages', jslnlp_package) \

@@ -42,7 +42,7 @@ class TestSentimentIdentification(unittest.TestCase):
                                       "language", "positive", "neutral",
                                       "negative", "score",
                                       "Predicted_Entity_and_Sentiment"])
-                                      
+
         aws = AWSInterface(self.spark, self.extraction_bucket,
                            self.sentiment_bucket, self.partitions,
                            self.extraction_date)

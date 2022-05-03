@@ -2,13 +2,13 @@ import unittest
 
 from datetime import datetime
 
+# NoQA used since these are needed for the tests that cannot run on GitHub
 from pyspark.sql import SparkSession, DataFrame # noqa
 
-from pyspark.ml import Pipeline
-
-from sparknlp.base import DocumentAssembler
+from pyspark.ml import Pipeline # noqa
+from sparknlp.base import DocumentAssembler # noqa
 from sparknlp.annotator import XlnetForTokenClassification, \
-    Tokenizer, BertEmbeddings, NerDLModel, NerConverter
+    Tokenizer, BertEmbeddings, NerDLModel, NerConverter # noqa
 
 from .. import AWSInterface, BrandIdentification
 
@@ -111,26 +111,26 @@ class TestBrandIdentification(unittest.TestCase):
 
         for stage, instance in zip(stages, instances):
             self.assertIsInstance(stage, instance)
-        
+
         self.assertEqual(len(stages), len(instances))
 
     def test_build_conll_pipeline(self):
         self.brand.model_name = "ner_conll_bert_base_cased"
         self.brand.build_pipeline()
-        
+
         stages = self.brand.pipeline.getStages()
 
         instances = [
-            DocumentAssembler, 
-            Tokenizer, 
+            DocumentAssembler,
+            Tokenizer,
             BertEmbeddings,
-            NerDLModel, 
+            NerDLModel,
             NerConverter
         ]
 
         for stage, instance in zip(stages, instances):
             self.assertIsInstance(stage, instance)
-        
+
         self.assertEqual(len(stages), len(instances))
 
     def test_predict_brand_xlnet_base(self):
@@ -156,6 +156,7 @@ class TestBrandIdentification(unittest.TestCase):
         self.assertLess(brand_df.count(), self.df.count())
         self.assertSetEqual(set(brand_df.columns), self.brand_columns)
     """
+
 
 if __name__ == "__main__":
     unittest.main()
